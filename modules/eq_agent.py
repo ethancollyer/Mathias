@@ -1,13 +1,17 @@
 import ollama
+import json
 
 
 class EqAgent(ollama.Client):
     def __init__(self, model: str = 'mistral:7b-instruct'):
         super().__init__()
+        with open("sys_messages.json", "r") as fp:
+            sys_message = json.load(fp)['sys_message_coder']
+
         self.model = model
         self.sys_message = {
             "role": "system",
-            "content": """Your purpose is to generate a final equation as an output based on the input message. Substitute each variable with their respective numeric value. Only output the equation. No other text should be in your output. For example, your entire output should follow the following format exactly as it is written: '[insert_unkown_variable_here] = [insert_final_expression_here]'"""
+            "content": sys_message
         }
         self.history = [self.sys_message]
 

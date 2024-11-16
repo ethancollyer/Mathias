@@ -12,12 +12,11 @@ question = questions['question_2']
 
 declarative_agent.append_history(input_message=question['question'])
 response = declarative_agent.chat()
-print(response)
+print(f"EXPLINATION:\n{response}\n{'='*50}")
 
-print("="*50)
-
+equation_agent.append_history(input_message=response)
 response = equation_agent.chat()
-print(response)
+print(f"RESPONSE:\n{response}")
 
-print(question['answer'])
+print(f"ANSWER:\n{question['answer']}")
 
