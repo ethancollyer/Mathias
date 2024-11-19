@@ -6,7 +6,17 @@ class Calculator():
     def __init__(self, function: str, target: str, variables: dict):
         self.function = function
         self.variables = variables
-        self.target = {target: self.variables.pop(target)}
+        if target in variables.keys():
+            self.target_variable = target
+            self.target_expression = self.variables.pop(target)
+        else:
+            self.target_variable = target
+            self.target_expression = f"IGNORE: definition of \"{target}\" not found in variable_definitions"
+
+        tmp_expressions = self.split()
+        self.variables = self.parse_variables()
+        self.substitute(expressions=tmp_expressions)
+        self.expressions = self.simplify(expressions=tmp_expressions)
 
     def split(self):
         right = self.function
@@ -15,42 +25,56 @@ class Calculator():
         if match:
                 left = right[:match.start()]
                 right = right[match.end() + 1:]
-                self.expressions = [left, right]
+                expressions = [left, right]
         else:
-            self.expressions = [right]
+            expressions = [right]
+
+        return expressions
+
+    def parse_variables(self):
+        parse_check = False
+        for key, value in self.variables.items():
+            if key in value:
+                new_key = f"variable_{key}"
+                variables = {k: v.replace(key, new_key) if k != key else value for k, v in self.variables.items()}
+                variables.update({new_key: variables.pop(key)})
+                parse_check = True
+
+        if parse_check:
+            return variables
+        else:
+            return self.variables
+
 
     def substitute(self, expressions: list):
-        substitution_made = False
+        substitution_check = False
         for i in range(len(expressions)):
             original_expression = expressions[i]
             for key, value in self.variables.items():
                 pattern = r'\b' + re.escape(key) + r'\b'
                 expressions[i] = re.sub(pattern, value, expressions[i])
             if expressions[i] != original_expression:
-                substitution_made = True
+                substitution_check = True
         
-        if substitution_made:
+        if substitution_check:
             return self.substitute(expressions=expressions)
-        else:
-            self.expressions = expressions
    
-    def simplify(self):
-        self.split()
-        self.substitute(expressions=self.expressions)
-        self.expressions_simplified = list()
-        for expression in self.expressions:
-            self.expressions_simplified.append(simplify(sympify(expression)))
+    def simplify(self, expressions: list):
+        expressions_simplified = list()
+        for expression in expressions:
+            expressions_simplified.append(simplify(sympify(expression.lower())))
+
+        return expressions_simplified
 
     def calulate(self):
-        self.simplify()
-        if len(self.expressions_simplified) > 1:
-            left = self.expressions_simplified[0]
-            right = self.expressions_simplified[1]
+        left = self.expressions[0]
+        if len(self.expressions) > 1:
+            right = self.expressions[1]
             equation = Eq(left, right)
         else:
-            equation = Eq(self.expressions_simplified[0], 0)
-        solution = ", ".join([f"{self.target} = {s}" for s in solve(equation)])
-        output = f"Solved target variable \"{self.target}\" in the equation \"{self.function}\":\n{solution}"
+            equation = Eq(left, 0)
+        solution = ", ".join([f"{self.target_variable} = {s}" for s in solve(equation)])
+        output = f"Calculated target variable \"{self.target_variable}\" in the equation \"{self.function}\" as:\n{solution}"
         
         return output, solution
 

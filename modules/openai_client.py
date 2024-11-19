@@ -1,8 +1,10 @@
-import ollama
+import openai
+import os
 
 
-class OllamaAgent:
-    def __init__(self, sys_message: str, model: str = 'mistral:7b-instruct'):
+class OpenAiClient:
+    def __init__(self, sys_message: str, model: str = 'gpt-4o-mini', api_key: str = os.getenv("OPENAI_API_KEY")):
+        openai.api_key = api_key
         self.model = model
         self.sys_message = {
             "role": "system",
@@ -18,6 +20,7 @@ class OllamaAgent:
         self.history.append(message)
 
     def chat(self):
-        response = ollama.chat(model=self.model, messages=self.history)
-        return response['message']['content']
+        response = openai.chat.completions.create(model=self.model, messages=self.history)
+        return response.choices[0].message.content
+    
     

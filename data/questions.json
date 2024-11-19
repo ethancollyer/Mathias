@@ -22,6 +22,14 @@
     "question_6": {
         "question": "Two hikers start walking towards each other from two campsites 300 km apart. Hiker A departs at 6:00 AM, walking at a speed of 30 km/h. Hiker B departs at 8:00 AM, walking at a speed of 50 km/h. At what time will the two hikers meet?",
         "answer": "30t+50(t-2)=300"
+    },
+    "question_7": {
+        "question": "Find the particular solution to the differential equation  y' = 3x^3 that passes through  (1, 4.75), given that  y = C + (3x^4 / 4) is a general solution.",
+        "answer": "y = 4 + (3x^4 / 4). C = 4."
+    },
+    "question_8": {
+        "question": "Find the particular solution to the differential equation  du / dt = tan u that passes through (1, pi / 2), given that  u = sin^(-1) (e^(C+t)) is a general solution.",
+        "answer": "u = sin^(-1) * (e^(-1+t))."
     }
 }
 
