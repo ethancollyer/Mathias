@@ -10,8 +10,9 @@ This project is currently in early development and for personal experimentation.
 
 - [x] Ollama Client
 - [x] OpenAI Client
-- [x] Sympy Calculator
-- [x] Practice Problems
+- [o] Sympy Calculator
+- [o] Practice Problems
+- [ ] Debugger LLM
 - [ ] Prompt Optimization
 - [ ] Calculator Debugging
 - [ ] Performance Testing
