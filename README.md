@@ -8,7 +8,7 @@ This project is currently in early development and for personal experimentation.
 
 ## In-Development
 
-- [] Prompt Optimization
-- [] Calculator Debigging
-- [] Performance Testing
+- [ ] Prompt Optimization
+- [ ] Calculator Debigging
+- [ ] Performance Testing
 
