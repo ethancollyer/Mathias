@@ -1,8 +1,6 @@
-from modules.ollama_client import OllamaClient
-from modules.openai_client import OpenAiClient
+from modules.client import Client
 from modules.calculator import Calculator
 import json
-
 
 with open("data\\questions.json", "r") as fp:
     questions = json.load(fp)
@@ -10,22 +8,32 @@ with open("data\\questions.json", "r") as fp:
 with open("data\\sys_messages.json", "r") as fp:
     sys_messages = json.load(fp)
 
-parser_agent = OpenAiClient(sys_message=sys_messages["sys_message"])
-question = questions['question_8']
+#client = Client(sys_message=sys_messages["sys_message"], provider='openai', model='gpt-4o-mini')
+client = Client(sys_message=sys_messages["sys_message"], provider='ollama', model='mistral:7b-instruct')
 
-parser_agent.append_history(input_message=question['question'])
-response = parser_agent.chat()
-print(f"EXPLINATION:\n{response}\n{'='*50}")
+for key, value in questions.items():
+    question = value["question"]
+    answer = value["answer"]
+    print(f"QUESTION: {key}\n{question}\n{answer}\n\n")
 
-target = json.loads(response)["solution"]["target_variable"]
-variables = json.loads(response)["solution"]["variable_definitions"]
-equation = json.loads(response)["solution"]["proposed_equation"]
+    try:
+        client.append_history(input_message=question)
+        response = client.chat()
 
-print(f"EQUATION:\n{'-'*50}\n{equation}\n{'='*50}")
+        target = json.loads(response)["solution"]["target_variable"]
+        variables = json.loads(response)["solution"]["variable_definitions"]
+        equation = json.loads(response)["solution"]["proposed_equation"]
 
-print(f"ANSWER:\n{'-'*50}\n{question['answer']}\n{'='*50}")
+        print(f"\nEQUATION: {equation}\n")
 
-calculator = Calculator(function=equation, target=target, variables=variables)
-output, solution = calculator.calulate()
-print(f"OUTPUT:\n{'-'*50}\n{output}\n{'='*50}\nCALCULATED:\n{'-'*50}\n{solution}\n{'='*50}")
+        print(f"ANSWER: {answer}\n")
+
+        calculator = Calculator(function=equation, target=target, variables=variables)
+        output, solution = calculator.calulate()
+        print(f"OUTPUT:\n{output}\nCALCULATED:\n{solution}\n{'='*50}\n\n")
+
+    except BaseException as e:
+        print("ERROR")
+        with open("logs\\log.txt", "a") as fp:
+            fp.write(f"ERROR on {key}: {e.with_traceback()}\n{'='*50}\n")
 
