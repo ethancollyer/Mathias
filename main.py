@@ -28,7 +28,7 @@ for key, value in questions.items():
 
         print(f"ANSWER: {answer}\n")
 
-        calculator = Calculator(function=equation, target=target, variables=variables)
+        calculator = Calculator(equation=equation, target=target, variables=variables)
         output, solution = calculator.calulate()
         print(f"OUTPUT:\n{output}\nCALCULATED:\n{solution}\n{'='*50}\n\n")
 
