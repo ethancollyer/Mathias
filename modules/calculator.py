@@ -37,8 +37,8 @@ class Calculator():
         pattern = re.compile(r"[<>]=?|!=|==|=")
         match = re.search(pattern, left)
         if match:
-                left = left[:match.start()]
                 right = left[match.end() + 1:]
+                left = left[:match.start()]
                 expressions = [left, right]
         else:
             expressions = [left]
