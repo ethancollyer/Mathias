@@ -1,6 +1,7 @@
 import ollama
 import openai
 import os
+from .helpers import *
 
 """
 LLM Client that supports either ollama or openai to ingest a problem and output
@@ -10,7 +11,7 @@ that can be used by calculator class to fidn the answer.
 
 
 class Client:
-    def __init__(self, sys_message: str, provider: str, model: str):
+    def __init__(self, provider: str, model: str, sys_message: str = load_json("data\\sys_messages.json")["client_message"]):
         self.provider = provider.lower()
         self.model = model
         self.sys_message = {
@@ -57,5 +58,5 @@ class Client:
                     print(content, end='', flush=True)
                     response += content
 
-        return response
+        return response[response.find("{"):response.rfind("}") + 1]
 
