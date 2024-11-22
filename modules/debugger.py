@@ -5,23 +5,23 @@ import datetime
 
 
 class Debugger:
-    def __init__(self, error_type: type, error_message: str, response: str):
-        self.error_type = error_type
+    def __init__(self, error: Exception, error_message: str, response: str):
+        self.error = error
         self.error_message = error_message
         self.response = response
 
     def debug(self):
-        if self.error_type == json.decoder.JSONDecodeError:
+        if type(self.error) == json.decoder.JSONDecodeError:
             print("DEBUGGING")
             self.json_decode_error()
             print("ERROR RESOLVED!")
         else:
             print("ERROR UNRESOVLED!")
-            date = datetime.datetime.now(datetime.timezone.utc)
+            date = datetime.datetime.now(datetime.timezone.utc).date()
             working_dir = pathlib.Path(__file__).parent.parent.absolute()
-            with open(working_dir.joinpath("logs\\log.txt"), "a") as fp:
+            with open(working_dir.joinpath("logs\\log.txt"), "a", encoding="utf-8") as fp:
                 fp.write(f"{self.error_message}\n{'='*50}\n")
-            with open(working_dir.joinpath("error_scenarios\\{date}.txt"), "a") as fp:
+            with open(working_dir.joinpath(f"error_scenarios\\{date}.txt"), "a", encoding="utf-8") as fp:
                 fp.write(f"{self.error_message}\n{'='*50}\n{self.response}")
 
     def json_decode_error(self):

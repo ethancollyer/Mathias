@@ -1,4 +1,4 @@
-from sympy import Eq, sympify, simplify, solve, Number
+from sympy import *
 import re
 
 """
@@ -85,7 +85,7 @@ class Calculator():
         
         if substitution_check:
             return self.substitute(expressions=expressions)
-   
+        
     def simplify(self, expressions: list):
         """
         Formats all expressions using sympify so it can be used by the simplify method
@@ -100,13 +100,17 @@ class Calculator():
     def calulate(self):
         """
         Solves the equation, Eq(). If there is only one expression,
-        the method checks if left is not an instance of Number (meaning it has a variable).
-        In any other case, the situation is logged.
+        the method checks if left (or both left and right) is not an instance 
+        of Number (meaning it has a variable). In any other case, the situation is logged.
         """
         left = self.expressions[0]
         if len(self.expressions) > 1:
             right = self.expressions[1]
-            equation = Eq(left, right)
+            if isinstance(left, Number) and isinstance(right, Number):
+                string = f"ERROR: left '{left}' and right '{right}' cannot both be numbers. Try asking the client later."
+                return string, string
+            else:
+                equation = Eq(left, right)
         elif not isinstance(left, Number):
             equation = Eq(left, 0)
         else:

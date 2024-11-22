@@ -33,10 +33,9 @@ for key, value in questions.items():
         output, solution = calculator.calulate()
         print(f"OUTPUT:\n{output}\nCALCULATED:\n{solution}\n{'='*50}\n\n")
         client.history = [client.history[0]]
-        print(client.history)
 
     except Exception as error:
-        error_message = f"\nERROR on {key}: {error}"
-        debugger = Debugger(error_message=error_message, error_type=type(error), response=response)
+        error_message = f"ERROR on {key}: {error}"
+        debugger = Debugger(error_message=error_message, error=error, response=response)
         debugger.debug()
 
