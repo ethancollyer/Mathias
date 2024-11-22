@@ -1,5 +1,6 @@
 from sympy import *
 import re
+import pathlib
 
 """
 Calculator that ingests LLM's equation, target variable, and variable definitions,
@@ -114,8 +115,9 @@ class Calculator():
         elif not isinstance(left, Number):
             equation = Eq(left, 0)
         else:
-            with open("logs\\calculator_logs.txt", "a") as fp:
-                fp.writelines(f"Calculate equation failed to calculate Type: {type(equation)}\n{'='*50}")
+            path = pathlib.Path(__file__).parent.parent.absolute()
+            with open(path.joinpath("logs\\calculator_logs.txt"), "a") as fp:
+                fp.writelines(f"Calculate equation failed to calculate Type: {type(left)}\n{'='*50}")
             equation = left
 
         #Joins the list returned by solve(equation)
