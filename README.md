@@ -1,19 +1,22 @@
-# Mathias - Integrating LLMs with Mathmatics
+# Mathias - Math Intelligent Assistant
 
 ## Overview
 
-Mathias is a project striving to improve LLM capabilities to accurately solve mathmatical problems. 
+Mathias is looking to improve LLM capabilities to solve mathematical problems accurately. 
 To achieve this, Mathias dedicates the problem's logic to an LLM, and calculations to a calculator. 
-This project is currently in early development and for personal experimentation.
+This project is currently in early development and for personal experimentation with LLMs.
 
-## Features
+## TO DO
 
 - [x] Ollama Client
 - [x] OpenAI Client
 - [x] Sympy Calculator
-- [x] Practice Problems
-- [ ] Debugger LLM
-- [ ] Prompt Optimization
-- [ ] Calculator Debugging
+- [x] Test Problems
+- [x] Debugger LLM
+- [ ] Interactive CLI
 - [ ] Performance Testing
+- [ ] Debugger Improvements
+- [ ] Prompt Optimization
+- [ ] Integrated Function Calling
+
 
