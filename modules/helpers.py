@@ -24,7 +24,7 @@ def get_tools():
                         "description": "the mathmatical expression that needs to be computed. e.g. 3*x**2 = asin(16) / 4",
                     },
                 },
-                "required": ["location"],
+                "required": ["equation"],
             },
         },
     }]

@@ -26,7 +26,7 @@ class Calculator():
         Splits the original equation into two sides, 'left' and 'right',
         and returns the two sides with the operator that separated them.
         """
-        left = self.parse_equation(self.equation)
+        left = self.equation
         pattern = re.compile(r"[<>]=?|!=|==|=")
         match = re.search(pattern, left)
         if match:

@@ -4,6 +4,8 @@ def get_prompt(prompt_type: str = "calc"):
     """Retrieves either 'calc', 'client', or 'debugger' prompt."""
     if "calc" in prompt_type:
         return calc_prompt
+    if "conc" in prompt_type:
+        return conclusion_prompt
     else:
         return client_prompt
 
@@ -16,7 +18,7 @@ You are a problem solver specializing in structured reasoning. Your task is to t
 
 **Instructions:**
 -> Use symbols like 'a', 'c', or 'tA', 'tB' to define variables.
--> Write equations compatible with the Python sympy library.
+-> Write equations compatible with the Python sympy library. Do not write Python code. Just write the equation in a way that is compatible with the Python sympy library.
 -> Ensure each equation includes at least one variable representing the unknown to be solved.
 -> For multi-variable or ambiguous problems, provide reasonable assumptions, justify them, and document them clearly within the steps.
 -> Substitute all known variables with their respective values for the final equation.
@@ -49,16 +51,22 @@ Use this framework to approach each problem systematically.
 """
 
 calc_prompt = """"
-You are an LLM designed to solve numerical problems. You will receive a series of steps to solve a problem. **Your Task:**
+You are designed to solve numerical problems. You will receive a series of steps to solve a problem. **Your Task:**
 
 1. Interpret the steps carefully. Ensure you understand the calculations required at each step.
 2. Ensure the equations are compatible with the Python sympy library. e.g. sin^(-1)(2) should be written as asin(2). And 3x should be written as 3*x.
-3. Use the provided calculator tool to perform any necessary arithmetic or calculations.
+3. Do not write Python code. Just write the equation in a way that is compatible with the Python sympy library.
+4. Use the provided calculator tool to perform any necessary arithmetic or calculations.
 
 **Example Input Equation:**
 x^2 / 4 = arctan(16)
 
-**Example Output Equation for Calculator Tool:**
+**Example Equation for Calculator Tool:**
 x**2 / 4 = atan(16)
 """
 
+conclusion_prompt = """
+You are designed to walk the user through the process used to solve the problem, and why the calculated solution makes sense.
+The calculated solution should be found in the chat history from a previous assistant that used a calculator tool.
+Do not use any tools. Only write a conclusion that describes how the previous assistant calculated the solution.
+"""

@@ -5,7 +5,7 @@ import openai
 import os
 
 
-class OpenaiClient:
+class OpenAI:
     def __init__(self, model: str):
         self.model = model
         self.tools = get_tools()
