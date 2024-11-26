@@ -12,13 +12,12 @@ class Ollama:
         self.sys_message = {"role": "system", "content": get_prompt(prompt_type="client")}
         self.history = [self.sys_message]
 
-    def solve(self, input_message):
+    def solve(self, input_message: str):
         self.plan(input_message=input_message)
         self.compute()
-        print("STREAMING:")
         self.stream()
 
-    def plan(self, input_message):
+    def plan(self, input_message: str):
         """Takes problem as input then returns the client model's plan to solve the problem."""
         self.history.append({"role": "user", "content": input_message})
         completion = self.get_completion()
@@ -31,6 +30,7 @@ class Ollama:
         self.history[0] = {"role": "system", "content": get_prompt(prompt_type="calc")}
         completion = self.get_completion(tools=get_tools())
         message = self.get_message(completion)
+        self.args = self.get_args(message)
         self.history.append(message)
         self.call_tool()
 
@@ -48,21 +48,15 @@ class Ollama:
         self.history = [self.sys_message]
 
     def get_completion(self, tools: str = None, stream: bool = False):
-        completion = ollama.chat(
-            model=self.model,
-            messages=self.history,
-            tools=tools,
-            stream=stream
-        )
-
+        completion = ollama.chat(model=self.model, messages=self.history, tools=tools, stream=stream)
         return completion
     
     def get_message(self, completion):
         return json.loads(completion["message"].model_dump_json())
     
-    def get_completion_args(self, message):
+    def get_args(self, message):
         """Retrieves the input arguments identified by the client and to be used in the function call"""
-        return [f"{json.loads(message['tool_calls'][i]['function']['arguments']['equation'])}" for i in range(len(message["tool_calls"]))]
+        return [message['tool_calls'][i]['function']['arguments'] for i in range(len(message["tool_calls"]))]
     
     def call_tool(self):
         """Aggregates all tool calls into history"""

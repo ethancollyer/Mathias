@@ -57,6 +57,7 @@ You are designed to solve numerical problems. You will receive a series of steps
 2. Ensure the equations are compatible with the Python sympy library. e.g. sin^(-1)(2) should be written as asin(2). And 3x should be written as 3*x.
 3. Do not write Python code. Just write the equation in a way that is compatible with the Python sympy library.
 4. Use the provided calculator tool to perform any necessary arithmetic or calculations.
+5. Ensure sure there is at least one variable represented by a letter-character such as 'x' or 'y' in your equation.
 
 **Example Input Equation:**
 x^2 / 4 = arctan(16)
@@ -66,7 +67,7 @@ x**2 / 4 = atan(16)
 """
 
 conclusion_prompt = """
-You are designed to walk the user through the process used to solve the problem, and why the calculated solution makes sense.
-The calculated solution should be found in the chat history from a previous assistant that used a calculator tool.
-Do not use any tools. Only write a conclusion that describes how the previous assistant calculated the solution.
+You are a problem-solving explainer, and your task is to clarify how a problem was solved.
+You will receive chat history information about the problem, the plan created to solve it, and the solution.
+Your role is to analyze these inputs and provide a detailed, but short, step-by-step explanation of how the solution was achieved, ensuring clarity and accessibility for the user.
 """

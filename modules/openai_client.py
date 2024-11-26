@@ -14,87 +14,61 @@ class OpenAI:
         self.history = [self.sys_message]
         openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    def chat(self):
-        """Streams the final response from the client"""
-        self.history[0] = {"role": "system", "content": get_prompt(prompt_type="client")}
-        response = openai.chat.completions.create(
-            model=self.model,
-            messages=self.history,
-            tools=self.tools,
-            tool_choice="none",
-            stream=True
-        )
+    def solve(self, input_message: str):
+        self.plan(input_message)
+        self.compute()
+        self.stream()
 
-        for chunk in response:
+    def plan(self, input_message: str):
+        """Takes problem as input then returns the client model's plan to solve the problem."""
+        self.history.append({"role": "user", "content": input_message})
+        completion = self.get_completion()
+        message = self.get_message(completion)
+        self.history.append(message)
+
+    def compute(self):
+        self.history[0] = {"role": "system", "content": get_prompt(prompt_type="calc")}
+        completion = self.get_completion(tool_choice=self.tool_choice)
+        message = self.get_message(completion)
+        self.history.append(message)
+        self.call_tool(completion)
+
+    def stream(self):
+        """Streams the final response from the client"""
+        self.history[0] = {"role": "system", "content": get_prompt(prompt_type="conc")}
+        completion = self.get_completion(stream=True)
+
+        for chunk in completion:
             content = chunk.choices[0].delta.content
             if content:
                 print(content, end="", flush=True)
 
         self.history = [self.sys_message]
 
-
-    def update_history(self, input_message: str):
-        """Updates client history after the user sends a message to the client"""
-        self.history.append({"role": "user", "content": input_message})
-        self.setup()
-        self.history[0] = {"role": "system", "content": get_prompt(prompt_type="calc")}
-        completion = self.get_completion(tool_choice=self.tool_choice)
-        self.args = self.get_completion_args(completion)
-        message = self.get_message(completion)
-        message["content"] = self.get_content(completion, message)
-        self.history.append(message)
-
-        if completion.tool_calls:
-            self.history.extend(message for message in self.get_tool_messages(self.history))
-
-    def setup(self):
-        """Prepares logic for llm calculation"""
-        completion = self.get_completion(tool_choice="none")
-        message = self.get_message(completion)
-        self.history.append(message)
-
-    def get_completion(self, tool_choice):
+    def get_completion(self, tool_choice: str = "none", stream: bool = False):
         """Retrieves the client message metadata"""
-        response = openai.chat.completions.create(
-            model=self.model,
-            messages=self.history,
-            tools=self.tools,
-            tool_choice=tool_choice
-        )
-
-        return response.choices[0].message
+        completion = openai.chat.completions.create(model=self.model, messages=self.history, tools=self.tools, tool_choice=tool_choice, stream=stream)
+        return completion
 
     def get_message(self, completion):
         "Parses the message metadata into a python dict"
-        return json.loads(completion.model_dump_json())
+        return json.loads(completion.choices[0].message.model_dump_json())
+        
+    def get_args(self, completion):
+        """Retrieves the input arguments identified by the client and to be used in the function call"""
+        return [json.loads(completion.tool_calls[i].function.arguments) for i in range(len(completion.tool_calls))]
 
-    def get_content(self, completion, message: dict):
-        """Retrieves the content of the message"""
-        if completion.tool_calls:
-            return str(message["tool_calls"][0]["function"])
-        else:
-            return str(message["content"])
-
-    def get_tool_messages(self, history: list):
+    def call_tool(self, completion):
         "Aggregates all tool messages into a list"
-        messages = []
-        for i in range(len(history)):
-            if "tool_calls" in history[i].keys() and history[i]["tool_calls"]:
-                for j in range(len(history[i]["tool_calls"])):
+        for i in range(len(self.history)):
+            if "tool_calls" in self.history[i].keys() and self.history[i]["tool_calls"]:
+                for j in range(len(self.history[i]["tool_calls"])):
+                    self.args = self.get_args(completion.choices[0].message)
                     message = {
                         "role": "tool",
-                        "tool_call_id": history[i]["tool_calls"][j]["id"],
-                        "name": history[i]["tool_calls"][j]["function"]["name"],
-                        "content": Calculator(history[i]["tool_calls"][j]["function"]["arguments"]).calculate()
+                        "tool_call_id": self.history[i]["tool_calls"][j]["id"],
+                        "name": self.history[i]["tool_calls"][j]["function"]["name"],
+                        "content": str(Calculator(self.args[0]["equation"]).calculate())
                     }
-                    messages.append(message)
-
-        return messages
-
-    def get_completion_args(self, completion):
-        """Retrieves the input arguments identified by the client and to be used in the function call"""
-        if completion.tool_calls:
-            return [f"{json.loads(completion.tool_calls[i].function.arguments)}" for i in range(len(completion.tool_calls))]
-        else:
-            return None
+                    self.history.append(message)
 

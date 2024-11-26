@@ -12,13 +12,9 @@ def main():
         question = value["question"]
         answer = value["answer"]
 
-        #client.update_history(input_message=question)
-
-        #print(f"Chat History: {client.history}\n\n")
-        #print(f"Question: {question}\nAnswer: {answer}\nArguments: {client.args}\n{'-'*125}")
-
+        print(f"Question: {question}\nAnswer: {answer}\n{'-'*125}")
         client.solve(input_message=question)
-        #print(f"{client.history}")
+        print(f"\n{'-'*125}\nArguments: {client.args}")
         client.history = [client.sys_message]
         print(f"\n{'='*125}")
         
