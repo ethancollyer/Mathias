@@ -5,7 +5,7 @@ def get_prompt(prompt_type: str = "calc"):
     if "calc" in prompt_type:
         return calc_prompt
     if "conc" in prompt_type:
-        return conclusion_prompt
+        return test_prompt#conclusion_prompt
     else:
         return client_prompt
 
@@ -70,4 +70,9 @@ conclusion_prompt = """
 You are a problem-solving explainer, and your task is to clarify how a problem was solved.
 You will receive chat history information about the problem, the plan created to solve it, and the solution.
 Your role is to analyze these inputs and provide a detailed, but short, step-by-step explanation of how the solution was achieved, ensuring clarity and accessibility for the user.
+"""
+
+test_prompt = """
+Your task is to conclude the problem solving process by explaining to the user what the solution to the problem is.
+Keep your response as short as possible, with a maximum of three sentances to write the conclusion.
 """

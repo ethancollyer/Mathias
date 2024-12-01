@@ -2,7 +2,9 @@ from .helpers import *
 from .config import get_prompt
 from .calculator import Calculator
 import openai
+import json
 import os
+import re
 
 
 class OpenAI:
@@ -64,11 +66,12 @@ class OpenAI:
             if "tool_calls" in self.history[i].keys() and self.history[i]["tool_calls"]:
                 for j in range(len(self.history[i]["tool_calls"])):
                     self.args = self.get_args(completion.choices[0].message)
+                    self.equation = self.args[0]["equation"]
                     message = {
                         "role": "tool",
                         "tool_call_id": self.history[i]["tool_calls"][j]["id"],
                         "name": self.history[i]["tool_calls"][j]["function"]["name"],
-                        "content": str(Calculator(self.args[0]["equation"]).calculate())
+                        "content": str(Calculator(self.equation).calculate())
                     }
                     self.history.append(message)
-
+    

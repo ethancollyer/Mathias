@@ -3,6 +3,7 @@ from .config import get_prompt
 from .calculator import Calculator
 import ollama
 import json
+import re
 
 
 class Ollama:
@@ -66,9 +67,11 @@ class Ollama:
                 for j in range(len(self.history[i]["tool_calls"])):
                     tool_calls.append(self.history[i]["tool_calls"][j])
 
+                self.args = self.history[i]["tool_calls"][j]["function"]["arguments"]
+                self.equation = self.args["equation"]
                 message = {
                     "role": "assistant",
-                    "content": Calculator(self.history[i]["tool_calls"][j]["function"]["arguments"]["equation"]).calculate(),
+                    "content": Calculator(self.equation).calculate(),
                     "images": None,
                     "tool_calls": tool_calls
                 }

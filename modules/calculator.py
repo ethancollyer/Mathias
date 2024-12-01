@@ -1,25 +1,33 @@
 from sympy import *
-import json
+from .helpers import *
 import re
 
 """
-Calculator that ingests LLM's equation, target variable, and variable definitions,
-attempts to prepare the equation through the following techniques:
-    1. Splits the equation into two sides, left and right, if an operator is found as a substring
-    2. Truncates value if the LLM defined a variable as {key: key = def} to {key: def}
-    3. Fixes key-value pairs having the key as a substring in the value (prevents infinite recursion in next step)
-    4. Substitutes all values containing a substring that matches a key found in the variable definitions
-    5. Simplifies the cleaned expressions for final calculation
-    6. Callable caulculate method to calculate and return answer
+Calculator that ingests the equation, performs transormations, then uses the transformed
+equation to solve the equation using sympy.
 """
 
 
 class Calculator():
     def __init__(self, equation: str):
         self.equation = equation
+        print(f"Equation: {self.equation}\n")
 
-    def parse_equation(self, equaiton: str):
-        return json.loads(equaiton)["equation"]
+    def parse_equation(self, expression: str):
+        """Fixes common errors found in the equation produced by the client LLM."""
+        cases = {"|": "regex", "arc": "a", "^": "**", ")(": ")*("}
+        for case, replacement in cases.items():
+            if replacement == "regex":
+                pattern = re.compile(re.escape(case) + r"(.+)" + re.escape(case))
+                expression = pattern.sub(r"abs(\1)", expression)
+            else:
+                expression = expression.replace(case, replacement)
+        if expression.count('(') > expression.count(')'):
+            expression += ')' * (expression.count('(') - expression.count(')'))
+        elif expression.count(')') > expression.count('('):
+            expression = '(' * (expression.count(')') - expression.count('(')) + expression
+
+        return expression
 
     def split(self):
         """
@@ -36,7 +44,8 @@ class Calculator():
         else:
             right = "0"
             operator = "="
-
+        print(f"Split (l, o, r): {left}, {operator}, {right}\n")
+        
         return left, operator, right
         
     def parse_sides(self, left: str, right: str):
@@ -46,22 +55,31 @@ class Calculator():
         """
         left = simplify(sympify(left.lower()))
         right = simplify(sympify(right.lower()))
+        print(f"Simplify (l, r): {left}, {right}")
 
         return left, right
 
     def calculate(self):
         """
-        Solves the equation, 'equaiton', by splitting the two sides, simplifying them,
+        Solves the equation by splitting the two sides, simplifying them,
         and then solving the equation.
         """
         left, operator, right = self.split()
+        left = self.parse_equation(left)
+        right = self.parse_equation(right)
         left, right = self.parse_sides(left, right)
 
         if isinstance(left, Number) and isinstance(right, Number):
             return f"{left} {operator} {right}"
         equation = Eq(left, right)
+        print(f"Final Equation: {equation}")
 
         #Joins the list returned by solve(equation)
-        solution = f"{operator}".join([f"{s}" for s in solve(equation)])
+        try:
+            solution = f" {operator} ".join(f"{s}" for s in with_timeout(15, solve, equation))
+        except TimeoutError as e:
+            print(f"Calculation timed out: {e}")
+            solution = f"{left} {operator} {right}"
         
         return solution
+
